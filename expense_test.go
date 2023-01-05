@@ -1,7 +1,7 @@
 //go:build unit
 // +build unit
 
-package expenses
+package main
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
@@ -40,7 +40,7 @@ func TestGetExpenses(t *testing.T) {
 	}
 	defer db.Close()
 
-	h := Handler{db}
+	h := expenses.Handler{db}
 	c := e.NewContext(req, rec)
 	expected := "[{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}]"
 
@@ -69,7 +69,7 @@ func TestGetOneExpenses(t *testing.T) {
 	}
 	defer db.Close()
 
-	h := Handler{db}
+	h := expenses.Handler{db}
 	c := e.NewContext(req, rec)
 	c.SetPath("/expenses/:id")
 	c.SetParamNames("id")
@@ -104,7 +104,7 @@ func TestCreateExpenses(t *testing.T) {
 
 	defer db.Close()
 
-	h := Handler{db}
+	h := expenses.Handler{db}
 	c := e.NewContext(req, rec)
 
 	expected := "{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}"
@@ -136,7 +136,7 @@ func TestUpdateExpense(t *testing.T) {
 
 	defer db.Close()
 
-	h := Handler{db}
+	h := expenses.Handler{db}
 	c := e.NewContext(req, rec)
 	c.SetPath("/:id")
 	c.SetParamNames("id")

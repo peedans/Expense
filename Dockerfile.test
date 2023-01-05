@@ -1,7 +1,7 @@
 FROM golang:1.19-alpine
 
-        WORKDIR /go/src/target
+WORKDIR /go/src/target
 
-        COPY . .
+COPY . .
 
-        CMD CGO_ENABLED=0 go test --tags=integration ./...
+CMD CGO_ENABLED=0 go test --tags=integration ./...

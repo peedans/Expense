@@ -1,6 +1,7 @@
 //go:build integration
+// +build integration
 
-package expenses
+package main
 
 import (
 	"bytes"
@@ -10,6 +11,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
+	"github.com/peedans/assessment/expenses"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"log"
@@ -21,11 +23,7 @@ import (
 	"time"
 )
 
-const serverPort = 80
-
-func NewApplication(db *sql.DB) *Handler {
-	return &Handler{db}
-}
+const PORT = 2565
 
 func TestGetExpenseByID(t *testing.T) {
 	eh := echo.New()
@@ -37,10 +35,10 @@ func TestGetExpenseByID(t *testing.T) {
 		h := NewApplication(db)
 
 		e.GET("/expenses/:id", h.GetExpense)
-		e.Start(fmt.Sprintf(":%d", serverPort))
+		e.Start(fmt.Sprintf(":%d", PORT))
 	}(eh)
 	for {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", PORT), 30*time.Second)
 		if err != nil {
 			log.Println(err)
 		}
@@ -54,7 +52,7 @@ func TestGetExpenseByID(t *testing.T) {
 	resp := request(http.MethodGet, uri("expenses", strconv.Itoa(expenseID)), nil)
 	defer resp.Body.Close()
 
-	var expense Expense
+	var expense expenses.Expense
 	err := resp.Decode(&expense)
 
 	expensesBytes, err := json.Marshal(expense)
@@ -86,10 +84,10 @@ func TestGetAllExpenses(t *testing.T) {
 		h := NewApplication(db)
 
 		e.GET("/expenses", h.GetExpenses)
-		e.Start(fmt.Sprintf(":%d", serverPort))
+		e.Start(fmt.Sprintf(":%d", PORT))
 	}(eh)
 	for {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", PORT), 30*time.Second)
 		if err != nil {
 			log.Println(err)
 		}
@@ -103,7 +101,7 @@ func TestGetAllExpenses(t *testing.T) {
 	defer resp.Body.Close()
 
 	// Decode the response body into a slice of expenses
-	var expenses []Expense
+	var expenses []expenses.Expense
 	err := resp.Decode(&expenses)
 
 	expensesBytes, err := json.Marshal(expenses)
@@ -134,10 +132,10 @@ func TestCreateExpense(t *testing.T) {
 		h := NewApplication(db)
 
 		e.POST("/expenses", h.CreateExpense)
-		e.Start(fmt.Sprintf(":%d", serverPort))
+		e.Start(fmt.Sprintf(":%d", PORT))
 	}(eh)
 	for {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", PORT), 30*time.Second)
 		if err != nil {
 			log.Println(err)
 		}
@@ -154,7 +152,7 @@ func TestCreateExpense(t *testing.T) {
 		"tags": ["food", "beverage"]
 	}`)
 
-	var expense Expense
+	var expense expenses.Expense
 
 	res := request(http.MethodPost, uri("expenses"), body)
 	err := res.Decode(&expense)
@@ -186,10 +184,10 @@ func TestUpdateExpense(t *testing.T) {
 
 		e.POST("/expenses", h.CreateExpense)
 		e.PUT("/expenses/:id", h.UpdateExpense)
-		e.Start(fmt.Sprintf(":%d", serverPort))
+		e.Start(fmt.Sprintf(":%d", PORT))
 	}(eh)
 	for {
-		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
+		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", PORT), 30*time.Second)
 		if err != nil {
 			log.Println(err)
 		}
@@ -205,7 +203,7 @@ func TestUpdateExpense(t *testing.T) {
 		"note": "promotion discount 10 bath",
 		"tags": ["food", "beverage"]
 	}`)
-	var createExpense Expense
+	var createExpense expenses.Expense
 	createRes := request(http.MethodPost, uri("expenses"), createBody)
 	err := createRes.Decode(&createExpense)
 	defer createRes.Body.Close()
@@ -220,7 +218,7 @@ func TestUpdateExpense(t *testing.T) {
 		"tags": ["food", "beverage", "dessert"]
 	}`)
 	updateURL := uri("expenses", strconv.Itoa(createExpense.ID))
-	var updateExpense Expense
+	var updateExpense expenses.Expense
 	updateRes := request(http.MethodPut, updateURL, updateBody)
 	err = updateRes.Decode(&updateExpense)
 	defer updateRes.Body.Close()
@@ -241,7 +239,7 @@ func TestUpdateExpense(t *testing.T) {
 }
 
 func uri(paths ...string) string {
-	host := fmt.Sprintf("http://localhost:%d", serverPort)
+	host := fmt.Sprintf("http://localhost:%d", PORT)
 	if paths == nil {
 		return host
 	}

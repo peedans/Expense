@@ -29,3 +29,4 @@ services:
       - ./db:/docker-entrypoint-initdb.d/
     networks:
       - integration-test
+
