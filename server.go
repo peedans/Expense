@@ -62,7 +62,7 @@ func main() {
 		return false, echo.ErrUnauthorized
 	}))
 
-	e.POST("/expenses", h.expenses.CreateExpense)
+	e.POST("/expenses", h.CreateExpense)
 
 	// Start the web server
 	port := os.Getenv("PORT")
