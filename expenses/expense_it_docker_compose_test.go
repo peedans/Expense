@@ -4,9 +4,12 @@ package expenses
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"log"
@@ -20,16 +23,20 @@ import (
 
 const serverPort = 80
 
+func NewApplication(db *sql.DB) *Handler {
+	return &Handler{db}
+}
+
 func TestGetExpenseByID(t *testing.T) {
 	eh := echo.New()
 	go func(e *echo.Echo) {
-		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
+		db, err := sql.Open("postgres", "postgresql://root:root@db/expenseDB?sslmode=disable")
 		if err != nil {
 			log.Fatal(err)
 		}
 		h := NewApplication(db)
 
-		e.GET("/expenses/:id", h.getExpense)
+		e.GET("/expenses/:id", h.GetExpense)
 		e.Start(fmt.Sprintf(":%d", serverPort))
 	}(eh)
 	for {
@@ -71,14 +78,14 @@ func TestGetAllExpenses(t *testing.T) {
 	// Setup server
 	eh := echo.New()
 	go func(e *echo.Echo) {
-		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
+		db, err := sql.Open("postgres", "postgresql://root:root@db/expenseDB?sslmode=disable")
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		h := NewApplication(db)
 
-		e.GET("/expenses", h.getExpenses)
+		e.GET("/expenses", h.GetExpenses)
 		e.Start(fmt.Sprintf(":%d", serverPort))
 	}(eh)
 	for {
@@ -120,13 +127,13 @@ func TestCreateExpense(t *testing.T) {
 
 	eh := echo.New()
 	go func(e *echo.Echo) {
-		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
+		db, err := sql.Open("postgres", "postgresql://root:root@db/expenseDB?sslmode=disable")
 		if err != nil {
 			log.Fatal(err)
 		}
 		h := NewApplication(db)
 
-		e.POST("/expenses", h.createExpense)
+		e.POST("/expenses", h.CreateExpense)
 		e.Start(fmt.Sprintf(":%d", serverPort))
 	}(eh)
 	for {
@@ -171,14 +178,14 @@ func TestUpdateExpense(t *testing.T) {
 	// Set up test server and send create expense request
 	eh := echo.New()
 	go func(e *echo.Echo) {
-		db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
+		db, err := sql.Open("postgres", "postgresql://root:root@db/expenseDB?sslmode=disable")
 		if err != nil {
 			log.Fatal(err)
 		}
 		h := NewApplication(db)
 
-		e.POST("/expenses", h.createExpense)
-		e.PUT("/expenses/:id", h.updateExpense)
+		e.POST("/expenses", h.CreateExpense)
+		e.PUT("/expenses/:id", h.UpdateExpense)
 		e.Start(fmt.Sprintf(":%d", serverPort))
 	}(eh)
 	for {

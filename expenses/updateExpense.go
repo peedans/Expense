@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (h *Handler) updateExpense(c echo.Context) error {
+func (h *Handler) UpdateExpense(c echo.Context) error {
 	// Get the ID of the expense to update
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

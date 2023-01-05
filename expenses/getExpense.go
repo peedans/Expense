@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (h *Handler) getExpenses(c echo.Context) error {
+func (h *Handler) GetExpenses(c echo.Context) error {
 	rows, err := h.DB.Query("SELECT * FROM expenses")
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: "can't query all expenses:" + err.Error()})
@@ -28,7 +28,7 @@ func (h *Handler) getExpenses(c echo.Context) error {
 	return c.JSON(http.StatusOK, expenses)
 }
 
-func (h *Handler) getExpense(c echo.Context) error {
+func (h *Handler) GetExpense(c echo.Context) error {
 	id := c.Param("id")
 	stmt, err := h.DB.Prepare(`SELECT id, title, amount, note, tags FROM expenses WHERE id = $1`)
 	if err != nil {

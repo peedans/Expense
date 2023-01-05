@@ -7,21 +7,17 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/peedans/assessment/expenses"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"github.com/peedans/assessment/expenses"
 )
 
-type Handler struct {
-	DB *sql.DB
-}
-
-func NewApplication(db *sql.DB) *Handler {
-	return &Handler{db}
+func NewApplication(db *sql.DB) *expenses.Handler {
+	return expenses.InitDB(db)
 }
 
 var db *sql.DB
@@ -39,16 +35,6 @@ func main() {
 	}
 	defer db.Close()
 
-	createTb := `
-	CREATE TABLE IF NOT EXISTS expenses (id SERIAL PRIMARY KEY,title TEXT,amount FLOAT,note TEXT,tags TEXT[]);
-    `
-
-	_, err = db.Exec(createTb)
-
-	if err != nil {
-		log.Fatal("can't create table", err)
-	}
-
 	h := NewApplication(db)
 
 	e := echo.New()
@@ -64,6 +50,9 @@ func main() {
 	}))
 
 	e.POST("/expenses", h.CreateExpense)
+	e.PUT("/expenses/:id", h.UpdateExpense)
+	e.GET("/expenses", h.GetExpenses)
+	e.GET("/expenses/:id", h.GetExpense)
 
 	// Start the web server
 	port := os.Getenv("PORT")

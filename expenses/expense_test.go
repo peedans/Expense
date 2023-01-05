@@ -4,6 +4,7 @@
 package expenses
 
 import (
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +26,7 @@ var Data = `{
 func TestGetExpenses(t *testing.T) {
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/expenses", strings.NewReader(""))
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader(""))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 
@@ -43,7 +44,7 @@ func TestGetExpenses(t *testing.T) {
 	c := e.NewContext(req, rec)
 	expected := "[{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}]"
 
-	err = h.getExpenses(c)
+	err = h.GetExpenses(c)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -75,7 +76,7 @@ func TestGetOneExpenses(t *testing.T) {
 	c.SetParamValues("1")
 	expected := "{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}"
 
-	err = h.getExpense(c)
+	err = h.GetExpense(c)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -108,7 +109,7 @@ func TestCreateExpenses(t *testing.T) {
 
 	expected := "{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}"
 
-	h.createExpense(c)
+	h.CreateExpense(c)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
@@ -119,7 +120,7 @@ func TestCreateExpenses(t *testing.T) {
 func TestUpdateExpense(t *testing.T) {
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPut, "/1", strings.NewReader(Data))
+	req := httptest.NewRequest(http.MethodPut, "/", strings.NewReader(Data))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 
@@ -143,7 +144,7 @@ func TestUpdateExpense(t *testing.T) {
 
 	expected := "{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}"
 
-	err = h.updateExpense(c)
+	err = h.UpdateExpense(c)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
