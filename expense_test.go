@@ -7,6 +7,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
+	"github.com/peedans/assessment/expenses"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,7 @@ func TestGetExpenses(t *testing.T) {
 	}
 	defer db.Close()
 
-	h := expenses.Handler{db}
+	h := expenses.Handler{DB: db}
 	c := e.NewContext(req, rec)
 	expected := "[{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}]"
 
@@ -69,7 +70,7 @@ func TestGetOneExpenses(t *testing.T) {
 	}
 	defer db.Close()
 
-	h := expenses.Handler{db}
+	h := expenses.Handler{DB: db}
 	c := e.NewContext(req, rec)
 	c.SetPath("/expenses/:id")
 	c.SetParamNames("id")
@@ -104,7 +105,7 @@ func TestCreateExpenses(t *testing.T) {
 
 	defer db.Close()
 
-	h := expenses.Handler{db}
+	h := expenses.Handler{DB: db}
 	c := e.NewContext(req, rec)
 
 	expected := "{\"id\":1,\"title\":\"test-title\",\"amount\":45.45,\"note\":\"test-note\",\"tags\":[\"test-tags1\",\"test-tags2\"]}"
@@ -136,7 +137,7 @@ func TestUpdateExpense(t *testing.T) {
 
 	defer db.Close()
 
-	h := expenses.Handler{db}
+	h := expenses.Handler{DB: db}
 	c := e.NewContext(req, rec)
 	c.SetPath("/:id")
 	c.SetParamNames("id")
